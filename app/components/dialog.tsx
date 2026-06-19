@@ -3,6 +3,7 @@ import React, { cloneElement, useEffect, useRef } from "react";
 import { Form, type HTMLFormMethod } from "react-router";
 
 import Button, { type ButtonProps } from "~/components/button";
+import { useI18n } from "~/i18n/context";
 import cn from "~/utils/cn";
 import { useLiveData } from "~/utils/live-data";
 
@@ -54,6 +55,7 @@ export interface DialogPanelProps {
 function Panel(props: DialogPanelProps) {
   const { children, onSubmit, isDisabled, variant, method = "POST" } = props;
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { t } = useI18n();
 
   return (
     <AlertDialog.Popup
@@ -87,17 +89,17 @@ function Panel(props: DialogPanelProps) {
         </div>
         <div className="mt-5 flex shrink-0 justify-end gap-3">
           {variant === "unactionable" ? (
-            <AlertDialog.Close render={<Button>Close</Button>} />
+            <AlertDialog.Close render={<Button>{t("common.close")}</Button>} />
           ) : (
             <>
-              <AlertDialog.Close render={<Button>Cancel</Button>} />
+              <AlertDialog.Close render={<Button>{t("common.cancel")}</Button>} />
               <AlertDialog.Close ref={closeRef} className="hidden" aria-hidden tabIndex={-1} />
               <Button
                 disabled={isDisabled}
                 type="submit"
                 variant={variant === "destructive" ? "danger" : "heavy"}
               >
-                Confirm
+                {t("common.confirm")}
               </Button>
             </>
           )}

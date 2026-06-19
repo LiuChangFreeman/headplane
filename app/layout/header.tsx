@@ -3,6 +3,7 @@ import {
   CircleQuestionMark,
   CircleUser,
   Globe,
+  Languages,
   Lock,
   Monitor,
   Moon,
@@ -15,6 +16,7 @@ import { NavLink, unstable_useRoute as useRoute, useLocation, useSubmit } from "
 
 import Link from "~/components/link";
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "~/components/menu";
+import { useI18n } from "~/i18n/context";
 import logoBg from "~/logo/dark-bg.svg";
 import logoDark from "~/logo/dark.svg";
 import logoLight from "~/logo/light.svg";
@@ -41,25 +43,26 @@ export interface HeaderProps {
 }
 
 const tabs = [
-  { to: "/machines", icon: Server, label: "Machines", key: "machines" },
-  { to: "/users", icon: Users, label: "Users", key: "users" },
-  { to: "/acls", icon: Lock, label: "Access Control", key: "policy" },
-  { to: "/dns", icon: Globe, label: "DNS", key: "dns" },
-  { to: "/settings", icon: Settings, label: "Settings", key: "settings" },
+  { to: "/machines", icon: Server, labelKey: "nav.machines", key: "machines" },
+  { to: "/users", icon: Users, labelKey: "nav.users", key: "users" },
+  { to: "/acls", icon: Lock, labelKey: "nav.accessControl", key: "policy" },
+  { to: "/dns", icon: Globe, labelKey: "nav.dns", key: "dns" },
+  { to: "/settings", icon: Settings, labelKey: "nav.settings", key: "settings" },
 ] as const;
 
 const colorSchemes = [
-  { value: "system", label: "System", icon: Monitor },
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
+  { value: "system", labelKey: "theme.system", icon: Monitor },
+  { value: "light", labelKey: "theme.light", icon: Sun },
+  { value: "dark", labelKey: "theme.dark", icon: Moon },
 ] as const satisfies ReadonlyArray<{
   value: ColorScheme;
-  label: string;
+  labelKey: "theme.system" | "theme.light" | "theme.dark";
   icon: typeof Monitor;
 }>;
 
 export default function Header({ user, access, configAvailable }: HeaderProps) {
   const submit = useSubmit();
+  const { locale, supportedLocales, t } = useI18n();
   const showTabs = access.ui;
   const rootRoute = useRoute("root");
   const currentColorScheme: ColorScheme = rootRoute?.loaderData?.colorScheme ?? "system";
@@ -110,14 +113,37 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
                     to={tab.to}
                   >
                     <tab.icon className="w-4" />
-                    {tab.label}
+                    {t(tab.labelKey)}
                   </NavLink>
                 );
               })}
             </nav>
           )}
         </div>
-        <div className="ml-auto grid shrink-0 grid-cols-2 gap-x-4">
+        <div className="ml-auto grid shrink-0 grid-cols-3 gap-x-4">
+          <Menu>
+            <MenuTrigger aria-label={t("locale.language")} className="size-8 rounded-full p-1">
+              <Languages className="w-5" />
+            </MenuTrigger>
+            <MenuContent align="end">
+              {supportedLocales.map((item) => (
+                <MenuItem
+                  key={item.value}
+                  onClick={() =>
+                    submit(
+                      { locale: item.value, returnTo },
+                      { action: "/api/locale", method: "POST" },
+                    )
+                  }
+                >
+                  <div className="flex items-center gap-x-2">
+                    <span className="flex-1">{item.nativeLabel}</span>
+                    {locale === item.value && <Check className="size-4" />}
+                  </div>
+                </MenuItem>
+              ))}
+            </MenuContent>
+          </Menu>
           <Menu>
             <MenuTrigger className="size-8 rounded-full p-1">
               <CircleQuestionMark className="w-5" />
@@ -125,7 +151,7 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
             <MenuContent align="end">
               <MenuItem>
                 <Link external to="https://headplane.net">
-                  Docs
+                  {t("nav.docs")}
                 </Link>
               </MenuItem>
               <MenuItem>
@@ -135,7 +161,7 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
               </MenuItem>
               <MenuItem>
                 <Link external to="https://tailscale.com/download">
-                  Download
+                  {t("nav.download")}
                 </Link>
               </MenuItem>
             </MenuContent>
@@ -153,7 +179,7 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
                 <div className="text-mist-900 dark:text-mist-50">
                   {user.subject === "api_key" ? (
                     <>
-                      <p className="font-bold">API Key</p>
+                      <p className="font-bold">{t("common.apiKey")}</p>
                       <p>{user.name}</p>
                     </>
                   ) : (
@@ -165,7 +191,7 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
                 </div>
               </MenuItem>
               <MenuSeparator />
-              {colorSchemes.map(({ value, label, icon: Icon }) => (
+              {colorSchemes.map(({ value, labelKey, icon: Icon }) => (
                 <MenuItem
                   key={value}
                   onClick={() =>
@@ -177,7 +203,7 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
                 >
                   <div className="flex items-center gap-x-2">
                     <Icon className="size-4" />
-                    <span className="flex-1">{label}</span>
+                    <span className="flex-1">{t(labelKey)}</span>
                     {currentColorScheme === value && <Check className="size-4" />}
                   </div>
                 </MenuItem>
@@ -187,7 +213,7 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
                 variant="danger"
                 onClick={() => submit({}, { action: "/logout", method: "POST" })}
               >
-                Logout
+                {t("nav.logout")}
               </MenuItem>
             </MenuContent>
           </Menu>
@@ -218,7 +244,7 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
                   to={tab.to}
                 >
                   <tab.icon className="w-4" />
-                  {tab.label}
+                  {t(tab.labelKey)}
                 </NavLink>
               );
             })}

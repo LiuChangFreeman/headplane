@@ -4,6 +4,7 @@ import { Form } from "react-router";
 
 import Button from "~/components/button";
 import TableList from "~/components/table-list";
+import { useI18n } from "~/i18n/context";
 import cn from "~/utils/cn";
 
 interface RestrictionProps {
@@ -14,11 +15,21 @@ interface RestrictionProps {
 }
 
 export default function RestrictionTable({ children, type, values, isDisabled }: RestrictionProps) {
+  const { t } = useI18n();
+  const titles = {
+    domain: t("settings.permittedDomains"),
+    group: t("settings.permittedGroups"),
+    user: t("settings.permittedUsers"),
+  };
+  const empty = {
+    domain: t("settings.allDomainsPermitted"),
+    group: t("settings.allGroupsPermitted"),
+    user: t("settings.allUsersPermitted"),
+  };
+
   return (
     <div className="w-full sm:w-2/3">
-      <h2 className="mt-8 text-2xl font-medium">
-        Permitted {type.charAt(0).toUpperCase() + type.slice(1)}s
-      </h2>
+      <h2 className="mt-8 text-2xl font-medium">{titles[type]}</h2>
       <TableList className="my-4">
         {values.length > 0 ? (
           values.map((value) => (
@@ -40,7 +51,7 @@ export default function RestrictionTable({ children, type, values, isDisabled }:
                   disabled={isDisabled}
                   type="submit"
                 >
-                  Remove
+                  {t("common.remove")}
                 </Button>
               </Form>
             </TableList.Item>
@@ -48,7 +59,7 @@ export default function RestrictionTable({ children, type, values, isDisabled }:
         ) : (
           <TableList.Item className="flex flex-col items-center gap-2.5 py-4 opacity-70">
             {iconForType(type)}
-            <p className="text-center font-semibold">All {type}s are permitted to authenticate.</p>
+            <p className="text-center font-semibold">{empty[type]}</p>
           </TableList.Item>
         )}
       </TableList>

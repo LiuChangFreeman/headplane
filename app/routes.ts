@@ -8,6 +8,7 @@ export default [
   ...prefix("/api", [
     route("/info", "routes/util/info.ts"),
     route("/color-scheme", "routes/util/color-scheme.ts"),
+    route("/locale", "routes/util/locale.ts"),
   ]),
   ...prefix("/events", [route("/live", "routes/util/live.ts")]),
 

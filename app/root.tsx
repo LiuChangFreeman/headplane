@@ -13,10 +13,12 @@ import ToastProvider from "~/utils/toast-provider";
 
 import type { Route } from "./+types/root";
 import { ErrorBanner } from "./components/error-banner";
+import { I18nProvider } from "./i18n/context";
 
 import "@fontsource-variable/inter/opsz.css";
 import "./tailwind.css";
 import { getColorScheme } from "./utils/color-scheme";
+import { getLocale } from "./utils/locale";
 
 export const meta: MetaFunction = () => [
   { title: "Headplane" },
@@ -27,8 +29,8 @@ export const meta: MetaFunction = () => [
 ];
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const colorScheme = await getColorScheme(request);
-  return { colorScheme };
+  const [colorScheme, locale] = await Promise.all([getColorScheme(request), getLocale(request)]);
+  return { colorScheme, locale };
 }
 
 export function Layout({ children }: { readonly children: React.ReactNode }) {
@@ -40,7 +42,7 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
   return (
     <LiveDataProvider>
       <html
-        lang="en"
+        lang={loaderData?.locale ?? "en"}
         className={
           loaderData?.colorScheme === "dark"
             ? "dark"
@@ -57,8 +59,10 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
           <link href={`${__PREFIX__}/favicon.ico`} rel="icon" />
         </head>
         <body className="w-full overflow-x-hidden overscroll-none dark:bg-mist-900 dark:text-mist-50">
-          {children}
-          <ToastProvider />
+          <I18nProvider locale={loaderData?.locale ?? "en"}>
+            {children}
+            <ToastProvider />
+          </I18nProvider>
           <ScrollRestoration />
           <Scripts />
         </body>

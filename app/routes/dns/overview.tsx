@@ -4,6 +4,7 @@ import { useLoaderData } from "react-router";
 import Code from "~/components/code";
 import Notice from "~/components/notice";
 import PageError from "~/components/page-error";
+import { useI18n } from "~/i18n/context";
 import type { AppContext } from "~/server/context";
 import { Capabilities } from "~/server/web/roles";
 
@@ -56,6 +57,7 @@ export async function action(data: ActionFunctionArgs) {
 
 export default function Page() {
   const data = useLoaderData<typeof loader>();
+  const { t } = useI18n();
 
   const allNs: Record<string, string[]> = {};
   for (const key of Object.keys(data.splitDns)) {
@@ -67,16 +69,8 @@ export default function Page() {
 
   return (
     <div className="flex max-w-(--breakpoint-lg) flex-col gap-16">
-      {data.writable ? undefined : (
-        <Notice>
-          The Headscale configuration is read-only. You cannot make changes to the configuration
-        </Notice>
-      )}
-      {data.access ? undefined : (
-        <Notice>
-          Your permissions do not allow you to modify the DNS settings for this tailnet.
-        </Notice>
-      )}
+      {data.writable ? undefined : <Notice>{t("dns.readOnly")}</Notice>}
+      {data.access ? undefined : <Notice>{t("dns.noAccess")}</Notice>}
       <RenameTailnet isDisabled={isDisabled} name={data.baseDomain} />
       <ManageNS isDisabled={isDisabled} nameservers={allNs} overrideLocalDns={data.overrideDns} />
       <ManageRecords isDisabled={isDisabled} records={data.extraRecords} />
@@ -87,15 +81,14 @@ export default function Page() {
       />
 
       <div className="flex w-full flex-col sm:w-2/3">
-        <h1 className="mb-4 text-2xl font-medium">Magic DNS</h1>
+        <h1 className="mb-4 text-2xl font-medium">{t("dns.magicDnsTitle")}</h1>
         <p className="mb-4">
-          Automatically register domain names for each device on the tailnet. Devices will be
-          accessible at{" "}
+          {t("dns.magicDnsBody")}{" "}
           <Code>
             [device].
             {data.baseDomain}
           </Code>{" "}
-          when Magic DNS is enabled.
+          {t("dns.magicDnsBodySuffix")}
         </p>
         <ToggleMagic isDisabled={isDisabled} isEnabled={data.magicDns} />
       </div>
