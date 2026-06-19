@@ -22,7 +22,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   }
 
   if (!context.hs.c?.oidc) {
-    throw data("OIDC is not configured on this Headscale instance.", {
+    throw data("settings.oidcNotConfigured", {
       status: 501,
     });
   }

@@ -1,13 +1,13 @@
 import { type } from "arktype";
 
 import Button from "~/components/button";
-import Code from "~/components/code";
 import Dialog, { DialogPanel } from "~/components/dialog";
 import Input from "~/components/input";
 import Select from "~/components/select";
 import Text from "~/components/text";
 import Title from "~/components/title";
 import { useForm } from "~/hooks/use-form";
+import { useI18n } from "~/i18n/context";
 
 const recordSchema = type({
   record_type: "'A' | 'AAAA'",
@@ -20,6 +20,8 @@ interface Props {
 }
 
 export default function AddRecord({ records }: Props) {
+  const { t } = useI18n();
+  const duplicateMessage = t("dns.recordAlreadyExists");
   const form = useForm({
     schema: recordSchema,
     defaultValues: { record_type: "A" },
@@ -31,8 +33,8 @@ export default function AddRecord({ records }: Props) {
       const lookup = records.find((r) => r.name === name);
       if (lookup?.value === ip) {
         return {
-          record_name: "This record already exists.",
-          record_value: "This record already exists.",
+          record_name: duplicateMessage,
+          record_value: duplicateMessage,
         };
       }
 
@@ -43,20 +45,19 @@ export default function AddRecord({ records }: Props) {
   const ip = form.values.record_value as string;
   const recordType = form.values.record_type as string;
   const isDuplicate =
-    !!form.errors.record_name?.includes("already exists") &&
-    !!form.errors.record_value?.includes("already exists");
+    form.errors.record_name === duplicateMessage && form.errors.record_value === duplicateMessage;
 
   return (
     <Dialog>
-      <Button>Add DNS record</Button>
+      <Button>{t("dns.addDnsRecord")}</Button>
       <DialogPanel onSubmit={() => form.reset()}>
-        <Title>Add DNS record</Title>
-        <Text>Enter the domain and IP address for the new DNS record.</Text>
+        <Title>{t("dns.addDnsRecord")}</Title>
+        <Text>{t("dns.addDnsRecordDescription")}</Text>
         <div className="mt-4 flex flex-col gap-2">
           <input type="hidden" name="action_id" value="add_record" />
           <Select
             required
-            label="Record Type"
+            label={t("dns.recordType")}
             name="record_type"
             defaultValue={recordType}
             onValueChange={(v) => {
@@ -70,20 +71,17 @@ export default function AddRecord({ records }: Props) {
           <Input
             {...form.field("record_name")}
             required
-            label="Domain"
+            label={t("common.domain")}
             placeholder="test.example.com"
           />
           <Input
             {...form.field("record_value")}
             required
-            label="IP Address"
+            label={t("dns.ipAddress")}
             placeholder={recordType === "AAAA" ? "2001:db8::ff00:42:8329" : "101.101.101.101"}
           />
           {isDuplicate ? (
-            <p className="text-sm opacity-50">
-              A record with the domain name <Code>{name}</Code> and IP address <Code>{ip}</Code>{" "}
-              already exists.
-            </p>
+            <p className="text-sm opacity-50">{t("dns.recordDuplicate", { name, ip })}</p>
           ) : undefined}
         </div>
       </DialogPanel>

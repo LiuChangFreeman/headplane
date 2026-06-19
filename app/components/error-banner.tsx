@@ -1,6 +1,8 @@
 import { AlertCircle } from "lucide-react";
 import { isRouteErrorResponse } from "react-router";
 
+import { useI18n } from "~/i18n/context";
+import type { TranslationKey } from "~/i18n/translations";
 import { isApiError, isConnectionError } from "~/server/headscale/api/error-client";
 import cn from "~/utils/cn";
 
@@ -8,7 +10,52 @@ import Card from "./card";
 import Code from "./code";
 import Link from "./link";
 
+type Translator = (key: TranslationKey, params?: Record<string, string | number>) => string;
+
+const rootErrorMessages: Record<string, TranslationKey> = {
+  "dns.noConfigurationAvailable": "dns.noConfigurationAvailable",
+  "dns.noViewAccess": "dns.noViewAccess",
+  "No configuration is available": "dns.noConfigurationAvailable",
+  "No machine ID provided": "error.noMachineId",
+};
+
+const routeErrorDataMessages: Record<string, TranslationKey> = {
+  "settings.oidcNotConfigured": "settings.oidcNotConfigured",
+  "OIDC is not configured on this Headscale instance.": "settings.oidcNotConfigured",
+};
+
+function translateRouteErrorData(data: unknown, t: Translator) {
+  if (typeof data !== "string") {
+    return String(data);
+  }
+
+  const key = routeErrorDataMessages[data];
+  return key ? t(key) : data;
+}
+
 export function getErrorMessage(error: Error | unknown): {
+  title: string;
+  jsxMessage: React.ReactNode;
+};
+export function getErrorMessage(
+  error: Error | unknown,
+  t: Translator,
+): {
+  title: string;
+  jsxMessage: React.ReactNode;
+};
+export function getErrorMessage(
+  error: Error | unknown,
+  t: Translator = (key, params) => {
+    let value = key as string;
+    if (params) {
+      value = value.replace(/\{(\w+)\}/g, (match, name) =>
+        params[name] === undefined ? match : String(params[name]),
+      );
+    }
+    return value;
+  },
+): {
   title: string;
   jsxMessage: React.ReactNode;
 } {
@@ -19,12 +66,7 @@ export function getErrorMessage(error: Error | unknown): {
         return {
           jsxMessage: (
             <>
-              <Card.Text>
-                There was an error communicating with the Headscale API.
-                <br />
-                The server responded with a status code of <strong>{statusCode}</strong>, indicating
-                a server-side issue. Please check the Headscale server status and try again later.
-              </Card.Text>
+              <Card.Text>{t("error.headscaleApiBody", { statusCode })}</Card.Text>
               {(error.data.data != null || error.data.rawData != null) && (
                 <pre className="mt-2 overflow-x-auto rounded-lg bg-mist-100 p-2 dark:bg-mist-800">
                   {error.data.data != null ? (
@@ -36,7 +78,7 @@ export function getErrorMessage(error: Error | unknown): {
               )}
             </>
           ),
-          title: "Headscale API Error",
+          title: t("error.headscaleApiTitle"),
         };
       }
 
@@ -46,23 +88,15 @@ export function getErrorMessage(error: Error | unknown): {
         jsxMessage: (
           <>
             <Card.Text className="leading-snug">
-              The Headscale API returned an unexpected response.
-              {authError ? (
-                <>
-                  {" "}
-                  The status code indicates an authentication error. Please verify your API key and
-                  Headplane configuration.
-                </>
-              ) : (
-                <> You may be using an unsupported version of Headscale or this may be a bug.</>
-              )}
+              {t("error.invalidApiBody")}
+              {authError ? <> {t("error.authApiHint")}</> : <> {t("error.unsupportedApiHint")}</>}
             </Card.Text>
             <ul className="mt-2 list-inside list-disc">
               <li>
-                Request URL: <Code>{requestUrl}</Code>
+                {t("error.requestUrl")}: <Code>{requestUrl}</Code>
               </li>
               <li>
-                Status Code:{" "}
+                {t("error.statusCode")}:{" "}
                 <Code>
                   {/* @ts-expect-error */}
                   {data === null ? (
@@ -77,13 +111,13 @@ export function getErrorMessage(error: Error | unknown): {
                 </Code>
               </li>
             </ul>
-            <Card.Text className="mt-4 text-lg font-semibold">Error Details</Card.Text>
+            <Card.Text className="mt-4 text-lg font-semibold">{t("common.errorDetails")}</Card.Text>
             <pre className="mt-2 overflow-x-auto rounded-lg bg-mist-100 p-2 dark:bg-mist-800">
               <code>{JSON.stringify(error.data, null, 2)}</code>
             </pre>
           </>
         ),
-        title: "Invalid response from Headscale API",
+        title: t("error.invalidApiTitle"),
       };
     }
 
@@ -92,11 +126,8 @@ export function getErrorMessage(error: Error | unknown): {
       return {
         jsxMessage: (
           <>
-            <Card.Text className="leading-snug">
-              Headplane was unable to reach the Headscale API. Please check your network setup and
-              configuration to ensure Headplane is able to connect.
-            </Card.Text>
-            <Card.Text className="mt-4 text-lg font-semibold">Error Details</Card.Text>
+            <Card.Text className="leading-snug">{t("error.cannotConnectBody")}</Card.Text>
+            <Card.Text className="mt-4 text-lg font-semibold">{t("common.errorDetails")}</Card.Text>
             <pre className="mt-2 overflow-x-auto rounded-lg bg-mist-100 p-2 dark:bg-mist-800">
               {requestUrl}
               <br />
@@ -111,21 +142,21 @@ export function getErrorMessage(error: Error | unknown): {
             </pre>
           </>
         ),
-        title: "Cannot connect to Headscale API",
+        title: t("error.cannotConnectTitle"),
       };
     }
 
     return {
       jsxMessage: (
         <>
-          There was an error processing your request.
+          {t("error.processingRequest")}
           <br />
-          Status Code: <strong>{error.status}</strong>
+          {t("error.statusCode")}: <strong>{error.status}</strong>
           <br />
-          Status Text: <strong>{error.data}</strong>
+          {t("error.statusText")}: <strong>{translateRouteErrorData(error.data, t)}</strong>
         </>
       ),
-      title: `Error ${error.status}`,
+      title: t("error.genericTitle", { status: error.status }),
     };
   }
 
@@ -134,20 +165,18 @@ export function getErrorMessage(error: Error | unknown): {
       jsxMessage: (
         <>
           <Card.Text>
-            An unexpected error occurred which is most likely a bug. Please consider reporting
-            filing an issue on the{" "}
+            {t("error.unexpectedBody")}{" "}
             <Link external styled to="https://github.com/tale/headplane/issues">
               Headplane GitHub
-            </Link>{" "}
-            repository with the details below.
+            </Link>
           </Card.Text>
-          <Card.Text className="mt-4 text-lg font-semibold">Error Details</Card.Text>
+          <Card.Text className="mt-4 text-lg font-semibold">{t("common.errorDetails")}</Card.Text>
           <pre className="mt-2 overflow-x-auto rounded-lg bg-mist-100 p-2 dark:bg-mist-800">
             <code>{JSON.stringify(error, null, 2)}</code>
           </pre>
         </>
       ),
-      title: "Unexpected Error",
+      title: t("error.unexpectedTitle"),
     };
   }
 
@@ -165,12 +194,20 @@ export function getErrorMessage(error: Error | unknown): {
     throw new Error("AggregateError handling not implemented yet");
   }
 
+  const translatedMessageKey = rootErrorMessages[rootError.message];
+  if (translatedMessageKey) {
+    return {
+      jsxMessage: t(translatedMessageKey),
+      title: t("common.error"),
+    };
+  }
+
   return {
     jsxMessage: rootError.message,
     title:
       rootError.name.length > 0 && rootError.name !== "Error"
-        ? `Error: ${rootError.name}`
-        : "Error",
+        ? `${t("common.error")}: ${rootError.name}`
+        : t("common.error"),
   };
 }
 
@@ -180,7 +217,8 @@ interface ErrorBannerProps {
 }
 
 export function ErrorBanner({ error, className }: ErrorBannerProps) {
-  const { title, jsxMessage } = getErrorMessage(error);
+  const { t } = useI18n();
+  const { title, jsxMessage } = getErrorMessage(error, t);
 
   return (
     <Card className={cn("w-screen", className)} variant="flat">

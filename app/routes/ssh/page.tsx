@@ -4,7 +4,7 @@ import { data, isRouteErrorResponse, type ShouldRevalidateFunction } from "react
 
 import Button from "~/components/button";
 import Card from "~/components/card";
-import Code from "~/components/code";
+import { useI18n } from "~/i18n/context";
 import { findHeadscaleUserBySubject } from "~/server/web/headscale-identity";
 
 import type { Route } from "./+types/page";
@@ -110,6 +110,7 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export default function Page({ loaderData }: Route.ComponentProps) {
+  const { t } = useI18n();
   const { hostname, username, offline, node } = loaderData;
 
   if (offline) {
@@ -117,14 +118,12 @@ export default function Page({ loaderData }: Route.ComponentProps) {
       <div className="flex h-screen w-screen items-center justify-center bg-black">
         <Card className="w-screen" variant="flat">
           <div className="flex items-center justify-between gap-4">
-            <Card.Title>Node Offline</Card.Title>
+            <Card.Title>{t("ssh.nodeOffline")}</Card.Title>
             <WifiOff className="mb-2 h-6 w-6 text-red-500" />
           </div>
-          <Card.Text>
-            <Code>{hostname}</Code> is not currently connected to the Tailnet.
-          </Card.Text>
+          <Card.Text>{t("ssh.nodeOfflineBody", { hostname })}</Card.Text>
           <Button className="mt-8 w-full" onClick={() => window.location.reload()}>
-            Retry Connection
+            {t("ssh.retryConnection")}
           </Button>
         </Card>
       </div>
@@ -149,7 +148,8 @@ function SSHConsole({
 }) {
   const [ssh, setSsh] = useState<HeadplaneSSH | null>(null);
   const [connected, setConnected] = useState(false);
-  const [status, setStatus] = useState("Starting tunnel…");
+  const { t } = useI18n();
+  const [status, setStatus] = useState(() => t("ssh.startingTunnel"));
 
   useEffect(() => {
     let cancelled = false;
@@ -162,7 +162,7 @@ function SSHConsole({
         return;
       }
 
-      setStatus("Joining Tailnet…");
+      setStatus(t("ssh.joiningTailnet"));
       const instance = create({
         controlURL: node.controlURL,
         preAuthKey: node.preAuthKey,
@@ -170,14 +170,14 @@ function SSHConsole({
         onReady: () => {
           console.log("[ssh] IPN ready (Running)");
           if (!cancelled) {
-            setStatus(`Connecting to ${hostname}…`);
+            setStatus(t("ssh.connectingToHost", { hostname }));
             setSsh(instance);
           }
         },
         onError: (msg) => {
           console.error("[ssh] IPN error:", msg);
           if (!cancelled) {
-            setStatus(`Failed to join Tailnet: ${msg}`);
+            setStatus(t("ssh.failedToJoinTailnet", { message: msg }));
           }
         },
       });
@@ -188,7 +188,7 @@ function SSHConsole({
     return () => {
       cancelled = true;
     };
-  }, [node]);
+  }, [hostname, node, t]);
 
   return (
     <div className="fixed inset-0 flex flex-col bg-black">
@@ -223,8 +223,8 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   return (
     <div className="flex h-screen w-screen items-center justify-center">
       <SSHErrorBoundary
-        title={routeError.title}
-        message={routeError.message}
+        code={routeError.code}
+        hostname={routeError.hostname}
         anchor={routeError.anchor}
       />
     </div>

@@ -72,5 +72,6 @@ export default function Page({ loaderData: { config, isOidcEnabled } }: Route.Co
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  return <PageError error={error} page="Settings" />;
+  const { t } = useI18n();
+  return <PageError error={error} page={t("nav.settings")} />;
 }

@@ -11,6 +11,7 @@ import Select from "~/components/select";
 import Text from "~/components/text";
 import Title from "~/components/title";
 import { useForm } from "~/hooks/use-form";
+import { useI18n } from "~/i18n/context";
 import type { User } from "~/types";
 import { getUserDisplayName } from "~/utils/user";
 
@@ -27,6 +28,7 @@ export interface NewMachineProps {
 }
 
 export default function NewMachine(data: NewMachineProps) {
+  const { t } = useI18n();
   const [pushDialog, setPushDialog] = useState(false);
   const form = useForm({ schema: registerSchema });
   const navigate = useNavigate();
@@ -35,22 +37,22 @@ export default function NewMachine(data: NewMachineProps) {
     <>
       <Dialog isOpen={pushDialog} onOpenChange={setPushDialog}>
         <DialogPanel isDisabled={!form.canSubmit}>
-          <Title>Register Machine Key</Title>
-          <Text>The machine key is given when you run the following command on your device:</Text>
+          <Title>{t("machines.registerMachineKey")}</Title>
+          <Text>{t("machines.registerMachineDescription")}</Text>
           <CodeBlock className="mb-4">{`tailscale up --login-server=${data.server}`}</CodeBlock>
           <input name="action_id" type="hidden" value="register" />
           <Input
             {...form.field("register_key")}
             required
-            label="Machine Key"
+            label={t("machines.machineKey")}
             placeholder="AbCd..."
           />
           <Select
             required
-            label="Owner"
+            label={t("common.owner")}
             name="user"
             onValueChange={(v) => form.setValue("user", v)}
-            placeholder="Select a user"
+            placeholder={t("machines.selectUser")}
             items={data.users.map((user) => ({
               // Headscale's v1/node/register endpoint resolves the owner by
               // username via GetUserByName, so we must pass user.name (not id).
@@ -62,7 +64,7 @@ export default function NewMachine(data: NewMachineProps) {
       </Dialog>
       <Menu disabled={data.isDisabled}>
         <MenuTrigger className="rounded-md bg-indigo-500 px-3.5 py-2 text-sm font-semibold text-white hover:bg-indigo-500/90 dark:bg-indigo-500/90 dark:hover:bg-indigo-500/80">
-          Add Device
+          {t("machines.addDevice")}
         </MenuTrigger>
         <MenuContent>
           <MenuItem
@@ -71,7 +73,7 @@ export default function NewMachine(data: NewMachineProps) {
           >
             <div className="flex items-center gap-x-3">
               <Computer className="w-4" />
-              Register Machine Key
+              {t("machines.registerMachineKey")}
             </div>
           </MenuItem>
           <MenuItem
@@ -80,7 +82,7 @@ export default function NewMachine(data: NewMachineProps) {
           >
             <div className="flex items-center gap-x-3">
               <FileKey2 className="w-4" />
-              Generate Pre-auth Key
+              {t("machines.generatePreAuthKey")}
             </div>
           </MenuItem>
         </MenuContent>

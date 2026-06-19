@@ -8,6 +8,7 @@ import Code from "~/components/code";
 import Input from "~/components/input";
 import Link from "~/components/link";
 import { useI18n } from "~/i18n/context";
+import type { TranslationKey } from "~/i18n/translations";
 import { useLiveData } from "~/utils/live-data";
 
 import type { Route } from "./+types/page";
@@ -54,6 +55,17 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 }
 
 export const action = loginAction;
+
+const loginErrorMessages: Record<string, TranslationKey> = {
+  "Missing API key. Please enter your API key.": "login.missingApiKey",
+  "API key cannot be empty. Please enter a valid API key.": "login.emptyApiKey",
+  "API key was not found in the Headscale database": "login.apiKeyNotFound",
+  "API key is malformed (missing expiration). Please generate a new API key.":
+    "login.malformedApiKey",
+  "API key has expired": "login.expiredApiKey",
+  "API key is invalid (it may be incorrect or expired)": "login.invalidApiKey",
+  "Error while validating API key (see logs for details)": "login.validationError",
+};
 
 export default function Page({ loaderData, actionData }: Route.ComponentProps) {
   const { isCookieSecureEnabled, isOidcConnectorEnabled, oidcErrorCodes, urlState } = loaderData;
@@ -141,7 +153,7 @@ export default function Page({ loaderData, actionData }: Route.ComponentProps) {
             />
             {actionData?.success === false ? (
               <Card.Text className="mb-2 text-sm text-red-600 dark:text-red-300">
-                {actionData.message}
+                {t(loginErrorMessages[actionData.message] ?? "login.validationError")}
               </Card.Text>
             ) : undefined}
             <Button className="w-full" type="submit" variant="heavy">

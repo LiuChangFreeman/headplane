@@ -6,6 +6,7 @@ import Link from "~/components/link";
 import Switch from "~/components/switch";
 import TableList from "~/components/table-list";
 import Tooltip from "~/components/tooltip";
+import { useI18n } from "~/i18n/context";
 import cn from "~/utils/cn";
 
 import AddNS from "../dialogs/add-ns";
@@ -17,13 +18,15 @@ interface Props {
 }
 
 export default function ManageNS({ nameservers, isDisabled, overrideLocalDns }: Props) {
+  const { t } = useI18n();
+
   return (
     <div className="flex w-full flex-col sm:w-2/3">
-      <h1 className="mb-4 text-2xl font-medium">Nameservers</h1>
+      <h1 className="mb-4 text-2xl font-medium">{t("dns.nameservers")}</h1>
       <p>
-        Set the nameservers used by devices on the Tailnet to resolve DNS queries.{" "}
+        {t("dns.nameserversDescription")}{" "}
         <Link external styled to="https://tailscale.com/kb/1054/dns">
-          Learn more
+          {t("common.learnMore")}
         </Link>
       </p>
       <div className="mt-4">
@@ -53,6 +56,7 @@ interface ListProps {
 }
 
 function NameserverList({ isGlobal, isDisabled, nameservers, overrideLocalDns, name }: ListProps) {
+  const { t } = useI18n();
   const list = isGlobal ? nameservers.global : nameservers[name];
   const submit = useSubmit();
 
@@ -65,27 +69,25 @@ function NameserverList({ isGlobal, isDisabled, nameservers, overrideLocalDns, n
       <div className="mb-2 flex items-center justify-between">
         {isGlobal ? (
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-md font-medium opacity-80">Global Nameservers</h2>
+            <h2 className="text-md font-medium opacity-80">{t("dns.globalNameservers")}</h2>
             <div className="flex items-center gap-2 text-sm">
               <Tooltip
                 content={
                   <>
-                    When enabled, use the DNS servers listed below to resolve names outside the
-                    tailnet. When disabled (default), devices will prefer their local DNS
-                    configuration.{" "}
+                    {t("dns.overrideDnsTooltip")}{" "}
                     <Link external styled to="https://tailscale.com/kb/1054/dns#global-nameservers">
-                      Learn More
+                      {t("common.learnMore")}
                     </Link>
                   </>
                 }
               >
                 <Info className="size-4" />
               </Tooltip>
-              <p>Override DNS servers</p>
+              <p>{t("dns.overrideDnsServers")}</p>
               <Switch
                 className="h-[15px] w-[23px] p-0.5"
                 defaultChecked={overrideLocalDns}
-                label="Override local DNS settings"
+                label={t("dns.overrideLocalDnsSettings")}
                 name="override_dns"
                 onCheckedChange={(v) => {
                   submit(
@@ -120,7 +122,7 @@ function NameserverList({ isGlobal, isDisabled, nameservers, overrideLocalDns, n
                     disabled={isDisabled}
                     type="submit"
                   >
-                    Remove
+                    {t("common.remove")}
                   </Button>
                 </Form>
               </TableList.Item>

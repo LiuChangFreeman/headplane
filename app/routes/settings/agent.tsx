@@ -7,9 +7,17 @@ import StatusCircle from "~/components/status-circle";
 import Text from "~/components/text";
 import Title from "~/components/title";
 import { useI18n } from "~/i18n/context";
+import type { TranslationKey } from "~/i18n/translations";
 import { formatTimeDelta } from "~/utils/time";
 
 import type { Route } from "./+types/agent";
+
+const agentDisabledReasons: Record<string, TranslationKey> = {
+  "Agent is not enabled in the configuration": "settings.agentDisabledNotEnabled",
+  "Agent requires headscale.api_key to be configured": "settings.agentDisabledMissingApiKey",
+  "Agent requires Headscale 0.28 or newer": "settings.agentDisabledVersion",
+  "Agent failed to initialize (see logs)": "settings.agentDisabledFailed",
+};
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   await context.auth.require(request);
@@ -45,11 +53,13 @@ export default function Page({ loaderData }: Route.ComponentProps) {
   const isSyncing = fetcher.state !== "idle";
 
   if (!loaderData.enabled) {
+    const reasonKey = agentDisabledReasons[loaderData.reason];
+
     return (
       <div className="flex max-w-(--breakpoint-lg) flex-col gap-8">
         <Title>{t("settings.agentTitle")}</Title>
         <Notice title={t("settings.agentNotEnabled")}>
-          {loaderData.reason}. {t("settings.agentSetupPrefix")}{" "}
+          {reasonKey ? t(reasonKey) : loaderData.reason} {t("settings.agentSetupPrefix")}{" "}
           <Link external styled to="https://headplane.dev/docs/agent">
             {t("settings.agentSetupDocs")}
           </Link>

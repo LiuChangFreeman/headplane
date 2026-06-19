@@ -3,6 +3,7 @@ import Dialog, { DialogPanel } from "~/components/dialog";
 import Input from "~/components/input";
 import Text from "~/components/text";
 import Title from "~/components/title";
+import { useI18n } from "~/i18n/context";
 
 interface CreateUserProps {
   isOidc?: boolean;
@@ -10,22 +11,37 @@ interface CreateUserProps {
 }
 
 export default function CreateUser({ isOidc, isDisabled }: CreateUserProps) {
+  const { t } = useI18n();
+
   return (
     <Dialog>
-      <Button disabled={isDisabled}>Add user</Button>
+      <Button disabled={isDisabled}>{t("users.addUser")}</Button>
       <DialogPanel>
-        <Title>Create a Headscale user</Title>
+        <Title>{t("users.createHeadscaleUser")}</Title>
         <Text className="mb-6">
-          This creates a new user in Headscale. The user will appear in the &ldquo;Unlinked
-          Headscale Users&rdquo; section until they sign in
-          {isOidc ? " through your OIDC provider" : ""} and are automatically linked to a Headplane
-          account.
+          {isOidc ? t("users.createHeadscaleUserOidcBody") : t("users.createHeadscaleUserBody")}
         </Text>
         <input name="action_id" type="hidden" value="create_user" />
         <div className="flex flex-col gap-4">
-          <Input required label="Username" name="username" placeholder="my-new-user" type="text" />
-          <Input label="Display Name" name="display_name" placeholder="John Doe" type="text" />
-          <Input label="Email" name="email" placeholder="name@example.com" type="email" />
+          <Input
+            required
+            label={t("common.username")}
+            name="username"
+            placeholder="my-new-user"
+            type="text"
+          />
+          <Input
+            label={t("common.displayName")}
+            name="display_name"
+            placeholder="John Doe"
+            type="text"
+          />
+          <Input
+            label={t("common.email")}
+            name="email"
+            placeholder="name@example.com"
+            type="email"
+          />
         </div>
       </DialogPanel>
     </Dialog>

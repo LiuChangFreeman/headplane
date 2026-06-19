@@ -1,5 +1,6 @@
 import { Check, Copy, Info } from "lucide-react";
 
+import { useI18n } from "~/i18n/context";
 import cn from "~/utils/cn";
 import toast from "~/utils/toast";
 
@@ -13,6 +14,8 @@ export interface AttributeProps {
 }
 
 export default function Attribute({ name, value, tooltip, isCopyable }: AttributeProps) {
+  const { t } = useI18n();
+
   return (
     <dl className="group/attr flex items-baseline gap-1 text-sm">
       <dt
@@ -52,7 +55,7 @@ export default function Attribute({ name, value, tooltip, isCopyable }: Attribut
               }
 
               await navigator.clipboard.writeText(value);
-              toast(`Copied ${name} to clipboard`);
+              toast(t("common.copiedToClipboard"));
 
               setTimeout(() => {
                 for (const svg of svgs) {

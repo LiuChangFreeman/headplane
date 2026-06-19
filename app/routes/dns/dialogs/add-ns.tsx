@@ -10,6 +10,7 @@ import Text from "~/components/text";
 import Title from "~/components/title";
 import Tooltip from "~/components/tooltip";
 import { useForm } from "~/hooks/use-form";
+import { useI18n } from "~/i18n/context";
 import cn from "~/utils/cn";
 
 const nsSchema = type({
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export default function AddNameserver({ nameservers }: Props) {
+  const { t } = useI18n();
   const form = useForm({
     schema: nsSchema,
     defaultValues: { split_name: "global" },
@@ -36,7 +38,7 @@ export default function AddNameserver({ nameservers }: Props) {
         : Object.values(nameservers).some((nsList) => nsList.includes(ns));
 
       if (isDuplicate) {
-        return { ns: "This nameserver already exists." };
+        return { ns: t("dns.nameserverExists") };
       }
 
       return undefined;
@@ -46,33 +48,33 @@ export default function AddNameserver({ nameservers }: Props) {
 
   return (
     <Dialog>
-      <Button>Add nameserver</Button>
+      <Button>{t("dns.addNameserver")}</Button>
       <DialogPanel>
-        <Title className="mb-4">Add nameserver</Title>
+        <Title className="mb-4">{t("dns.addNameserver")}</Title>
         <input name="action_id" type="hidden" value="add_ns" />
         <Input
           {...form.field("ns")}
-          description="Use this IPv4 or IPv6 address to resolve names."
+          description={t("dns.nameserverDescription")}
           required
-          label="Nameserver"
+          label={t("dns.nameserver")}
           placeholder="1.2.3.4"
         />
         <div className="mt-8 flex items-center justify-between">
           <div className="block">
             <div className="inline-flex items-center gap-2">
-              <Text className="font-semibold">Restrict to domain</Text>
-              <Tooltip content="Only clients that support split DNS (Tailscale v1.8 or later for most platforms) will use this nameserver. Older clients will ignore it.">
+              <Text className="font-semibold">{t("dns.restrictToDomain")}</Text>
+              <Tooltip content={t("dns.splitDnsTooltip")}>
                 <Chip
                   className={cn("inline-flex items-center")}
                   leftIcon={<Split className="mr-0.5 h-3 w-3" />}
-                  text="Split DNS"
+                  text={t("dns.splitDns")}
                 />
               </Tooltip>
             </div>
-            <Text className="text-sm">This nameserver will only be used for some domains.</Text>
+            <Text className="text-sm">{t("dns.splitDnsDescription")}</Text>
           </div>
           <Switch
-            label="Split DNS"
+            label={t("dns.splitDns")}
             onCheckedChange={(checked) => {
               form.setValue("split_name", checked ? "" : "global");
             }}
@@ -80,17 +82,14 @@ export default function AddNameserver({ nameservers }: Props) {
         </div>
         {split ? (
           <>
-            <Text className="mt-8 font-semibold">Domain</Text>
+            <Text className="mt-8 font-semibold">{t("common.domain")}</Text>
             <Input
               {...form.field("split_name")}
               required
-              label="Domain"
+              label={t("common.domain")}
               placeholder="example.com"
             />
-            <Text className="text-sm">
-              Only single-label or fully-qualified queries matching this suffix should use the
-              nameserver.
-            </Text>
+            <Text className="text-sm">{t("dns.domainSuffixDescription")}</Text>
           </>
         ) : (
           <input name="split_name" type="hidden" value="global" />

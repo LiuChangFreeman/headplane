@@ -18,16 +18,14 @@ import { dnsAction } from "./dns-actions";
 // We do not want to expose every config value
 export async function loader({ request, context }: LoaderFunctionArgs<AppContext>) {
   if (!context.hs.readable()) {
-    throw new Error("No configuration is available");
+    throw new Error("dns.noConfigurationAvailable");
   }
 
   const principal = await context.auth.require(request);
   const check = context.auth.can(principal, Capabilities.read_network);
   if (!check) {
     // Not authorized to view this page
-    throw new Error(
-      "You do not have permission to view this page. Please contact your administrator.",
-    );
+    throw new Error("dns.noViewAccess");
   }
 
   const writablePermission = context.auth.can(principal, Capabilities.write_network);

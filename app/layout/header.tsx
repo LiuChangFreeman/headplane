@@ -85,7 +85,7 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
             <picture className="min-w-8">
               <source srcSet={logoLight} media="(prefers-color-scheme: dark)" />
               <source srcSet={logoDark} media="(prefers-color-scheme: light)" />
-              <img src={logoBg} alt="Headplane logo" />
+              <img src={logoBg} alt={t("common.logoAlt")} />
             </picture>
             <h1 className="text-2xl font-semibold">headplane</h1>
           </div>

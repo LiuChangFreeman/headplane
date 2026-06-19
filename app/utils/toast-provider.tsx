@@ -1,10 +1,12 @@
 import { Toast } from "@base-ui/react/toast";
 import { X } from "lucide-react";
 
+import { useI18n } from "~/i18n/context";
 import cn from "~/utils/cn";
 import { toastManager } from "~/utils/toast";
 
 function ToastList() {
+  const { t } = useI18n();
   const { toasts } = Toast.useToastManager();
   return toasts.map((toast) => (
     <Toast.Root
@@ -22,7 +24,7 @@ function ToastList() {
       >
         <Toast.Description>{toast.description}</Toast.Description>
         <Toast.Close
-          aria-label="Close"
+          aria-label={t("common.close")}
           className={cn(
             "inline-flex shrink-0 items-center justify-center rounded-full p-1",
             "bg-transparent hover:bg-mist-100",

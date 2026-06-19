@@ -1,6 +1,7 @@
 import { CircleUser } from "lucide-react";
 
 import StatusCircle from "~/components/status-circle";
+import { useI18n } from "~/i18n/context";
 import type { Role } from "~/server/web/roles";
 import cn from "~/utils/cn";
 
@@ -20,6 +21,7 @@ export default function HeadplaneUserRow({
   isSelf,
   isOwner,
 }: HeadplaneUserRowProps) {
+  const { t } = useI18n();
   const isOnline = user.machines.some((machine) => machine.online);
   const lastSeen = user.machines.reduce(
     (acc, machine) => Math.max(acc, new Date(machine.lastSeen).getTime()),
@@ -42,17 +44,17 @@ export default function HeadplaneUserRow({
             <p className="leading-snug font-semibold">{displayName}</p>
             {displayEmail && <p className="text-sm opacity-50">{displayEmail}</p>}
             {!user.headscaleUserId && (
-              <p className="text-xs text-amber-600 dark:text-amber-400">Not linked</p>
+              <p className="text-xs text-amber-600 dark:text-amber-400">{t("users.notLinked")}</p>
             )}
           </div>
         </div>
       </td>
       <td className="py-2 pl-0.5">
-        <p>{mapRoleToName(user.role)}</p>
+        <p>{mapRoleToName(user.role, t)}</p>
       </td>
       <td className="py-2 pl-0.5">
         <p className="text-sm text-mist-600 dark:text-mist-300" suppressHydrationWarning>
-          {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : "Never"}
+          {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : t("common.never")}
         </p>
       </td>
       <td className="py-2 pl-0.5">
@@ -62,11 +64,11 @@ export default function HeadplaneUserRow({
           >
             <StatusCircle className="h-4 w-4" isOnline={isOnline} />
             <p suppressHydrationWarning>
-              {isOnline ? "Connected" : new Date(lastSeen).toLocaleString()}
+              {isOnline ? t("common.connected") : new Date(lastSeen).toLocaleString()}
             </p>
           </span>
         ) : (
-          <p className="text-sm text-mist-600 dark:text-mist-300">No machines</p>
+          <p className="text-sm text-mist-600 dark:text-mist-300">{t("users.noMachines")}</p>
         )}
       </td>
       <td className="py-2 pr-0.5">
@@ -82,23 +84,23 @@ export default function HeadplaneUserRow({
   );
 }
 
-function mapRoleToName(role: Role) {
+function mapRoleToName(role: Role, t: ReturnType<typeof useI18n>["t"]) {
   switch (role) {
     case "owner":
-      return "Owner";
+      return t("users.owner");
     case "admin":
-      return "Admin";
+      return t("users.admin");
     case "network_admin":
-      return "Network Admin";
+      return t("users.networkAdmin");
     case "it_admin":
-      return "IT Admin";
+      return t("users.itAdmin");
     case "auditor":
-      return "Auditor";
+      return t("users.auditor");
     case "viewer":
-      return "Viewer";
+      return t("users.viewer");
     case "member":
-      return <p className="opacity-50">Member</p>;
+      return <p className="opacity-50">{t("users.member")}</p>;
     default:
-      return "Unknown";
+      return t("users.unknownRole");
   }
 }

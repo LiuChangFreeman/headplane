@@ -4,7 +4,6 @@ import { isRouteErrorResponse, useFetcher, useRevalidator } from "react-router";
 
 import Button from "~/components/button";
 import Card from "~/components/card";
-import Code from "~/components/code";
 import Link from "~/components/link";
 import Notice from "~/components/notice";
 import PageError from "~/components/page-error";
@@ -148,6 +147,8 @@ export default function Page({ loaderData: { access, writable, policy } }: Route
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  const { t } = useI18n();
+
   if (
     isRouteErrorResponse(error) &&
     isApiError(error.data) &&
@@ -158,33 +159,21 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       <div className="flex flex-col gap-4">
         <Card className="max-w-2xl" variant="flat">
           <div className="flex items-center justify-between gap-4">
-            <Card.Title>ACL Policy Unavailable</Card.Title>
+            <Card.Title>{t("acls.unavailableTitle")}</Card.Title>
             <AlertCircle className="mb-2 h-6 w-6 text-red-500" />
           </div>
-          <Card.Text>
-            The ACL policy is currently unavailable because the policy file does not exist on the
-            server. This usually indicates that Headscale is running in <Code>file</Code> mode for
-            ACLs, and the specified policy file is missing.
-          </Card.Text>
+          <Card.Text>{t("acls.unavailableBody")}</Card.Text>
         </Card>
         <Card className="max-w-2xl" variant="flat">
-          <Card.Text>
-            In order to resolve this issue, there are two possible actions you can take:
-          </Card.Text>
+          <Card.Text>{t("acls.unavailableActionsIntro")}</Card.Text>
           <ul className="mt-2 ml-4 list-outside list-disc space-y-1 text-sm">
-            <li>
-              Create the ACL policy file at the specified path in your Headscale configuration.
-            </li>
-            <li>
-              Alternatively, you can switch Headscale to use <Code>database</Code> mode for ACLs by
-              updating your Headscale configuration. This will allow Headplane to manage the ACL
-              policy directly through the web interface.
-            </li>
+            <li>{t("acls.unavailableCreatePolicy")}</li>
+            <li>{t("acls.unavailableSwitchDatabase")}</li>
           </ul>
         </Card>
       </div>
     );
   }
 
-  return <PageError error={error} page="Access Control" />;
+  return <PageError error={error} page={t("nav.accessControl")} />;
 }

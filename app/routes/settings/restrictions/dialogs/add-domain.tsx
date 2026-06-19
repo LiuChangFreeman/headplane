@@ -6,6 +6,7 @@ import Input from "~/components/input";
 import Text from "~/components/text";
 import Title from "~/components/title";
 import { useForm } from "~/hooks/use-form";
+import { useI18n } from "~/i18n/context";
 
 const domainSchema = type({
   domain: "string > 0",
@@ -17,6 +18,7 @@ interface AddDomainProps {
 }
 
 export default function AddDomain({ domains, isDisabled }: AddDomainProps) {
+  const { t } = useI18n();
   const form = useForm({
     schema: domainSchema,
     validate: (values) => {
@@ -24,16 +26,16 @@ export default function AddDomain({ domains, isDisabled }: AddDomainProps) {
       if (domain.length === 0) return undefined;
 
       if (domains.includes(domain)) {
-        return { domain: "This domain already exists in the list." };
+        return { domain: t("settings.domainExists") };
       }
 
       try {
         const url = new URL(`http://${domain}`);
         if (url.hostname !== domain) {
-          return { domain: "This is not a valid domain." };
+          return { domain: t("settings.domainInvalid") };
         }
       } catch {
-        return { domain: "This is not a valid domain." };
+        return { domain: t("settings.domainInvalid") };
       }
 
       return undefined;
@@ -43,23 +45,20 @@ export default function AddDomain({ domains, isDisabled }: AddDomainProps) {
 
   return (
     <Dialog>
-      <Button disabled={isDisabled}>Add domain</Button>
+      <Button disabled={isDisabled}>{t("settings.addDomain")}</Button>
       <DialogPanel>
-        <Title>Add domain</Title>
-        <Text className="mb-4">
-          Add this domain to a list of allowed email domains that can authenticate with Headscale
-          via OIDC.
-        </Text>
+        <Title>{t("settings.addDomain")}</Title>
+        <Text className="mb-4">{t("settings.addDomainDescription")}</Text>
         <input name="action_id" type="hidden" value="add_domain" />
         <Input
           {...form.field("domain")}
           description={
             domain.length > 0
-              ? `Matches users with <user>@${domain}`
-              : "Enter a domain to match users with their email addresses."
+              ? t("settings.domainMatchDescription", { domain })
+              : t("settings.domainPlaceholderDescription")
           }
           required
-          label="Domain"
+          label={t("common.domain")}
           placeholder="example.com"
         />
       </DialogPanel>

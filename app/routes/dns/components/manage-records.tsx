@@ -1,9 +1,9 @@
 import { Form } from "react-router";
 
 import Button from "~/components/button";
-import Code from "~/components/code";
 import Link from "~/components/link";
 import TableList from "~/components/table-list";
+import { useI18n } from "~/i18n/context";
 import cn from "~/utils/cn";
 
 import AddRecord from "../dialogs/add-record";
@@ -14,21 +14,22 @@ interface Props {
 }
 
 export default function ManageRecords({ records, isDisabled }: Props) {
+  const { t } = useI18n();
+
   return (
     <div className="flex w-full flex-col sm:w-2/3">
-      <h1 className="mb-4 text-2xl font-medium">DNS Records</h1>
+      <h1 className="mb-4 text-2xl font-medium">{t("dns.dnsRecords")}</h1>
       <p>
-        Headscale supports adding custom DNS records to your Tailnet. As of now, only <Code>A</Code>{" "}
-        and <Code>AAAA</Code> records are supported.{" "}
+        {t("dns.dnsRecordsDescription")}{" "}
         <Link external styled to="https://headscale.net/stable/ref/dns">
-          Learn More
+          {t("common.learnMore")}
         </Link>
       </p>
       <div className="mt-4">
         <TableList className="mb-8">
           {records.length === 0 ? (
             <TableList.Item>
-              <p className="mx-auto opacity-50">No DNS records found</p>
+              <p className="mx-auto opacity-50">{t("dns.noDnsRecordsFound")}</p>
             </TableList.Item>
           ) : (
             records.map((record) => (
@@ -58,7 +59,7 @@ export default function ManageRecords({ records, isDisabled }: Props) {
                     disabled={isDisabled}
                     type="submit"
                   >
-                    Remove
+                    {t("common.remove")}
                   </Button>
                 </Form>
               </TableList.Item>
