@@ -221,7 +221,7 @@ export function ErrorBanner({ error, className }: ErrorBannerProps) {
   const { title, jsxMessage } = getErrorMessage(error, t);
 
   return (
-    <Card className={cn("w-screen", className)} variant="flat">
+    <Card className={cn("w-full max-w-full", className)} variant="flat">
       <div className="flex items-center justify-between gap-4">
         <Card.Title>{title}</Card.Title>
         <AlertCircle className="mb-2 h-6 w-6 text-red-500" />

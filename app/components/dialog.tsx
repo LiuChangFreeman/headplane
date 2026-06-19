@@ -114,14 +114,14 @@ function DialogOverlay({ children }: { children: React.ReactNode }) {
     <AlertDialog.Portal>
       <AlertDialog.Backdrop
         className={cn(
-          "fixed inset-0 z-20 h-screen w-screen",
+          "fixed inset-0 z-20 h-dvh w-full",
           "bg-mist-900/30 dark:bg-mist-950/60",
           "transition-opacity duration-100",
         )}
       />
       <div
         className={cn(
-          "fixed inset-0 z-20 h-screen w-screen",
+          "dialog-viewport fixed inset-0 z-20 h-dvh w-full",
           "flex items-center justify-center p-4",
         )}
       >

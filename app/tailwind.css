@@ -95,6 +95,129 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html[data-pwa="true"],
+html[data-pwa="true"] body {
+  min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+}
+
+html[data-pwa="true"] {
+  background: var(--color-white);
+  position: relative;
+}
+
+html[data-pwa="true"] body {
+  position: relative;
+}
+
+html[data-pwa="true"].dark {
+  background: var(--color-mist-900);
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-pwa="true"]:not(.light):not(.dark) {
+    background: var(--color-mist-900);
+  }
+}
+
+html[data-pwa="true"] header {
+  padding-top: env(safe-area-inset-top);
+}
+
+html[data-pwa="true"] .container {
+  padding-inline-start: max(1rem, env(safe-area-inset-left));
+  padding-inline-end: max(1rem, env(safe-area-inset-right));
+}
+
+@media (width >= theme(--breakpoint-sm)) {
+  html[data-pwa="true"] .container {
+    padding-inline-start: max(2rem, env(safe-area-inset-left));
+    padding-inline-end: max(2rem, env(safe-area-inset-right));
+  }
+}
+
+@media (width >= theme(--breakpoint-lg)) {
+  html[data-pwa="true"] .container {
+    padding-inline-start: max(4rem, env(safe-area-inset-left));
+    padding-inline-end: max(4rem, env(safe-area-inset-right));
+  }
+}
+
+@media (width >= theme(--breakpoint-xl)) {
+  html[data-pwa="true"] .container {
+    padding-inline-start: max(5rem, env(safe-area-inset-left));
+    padding-inline-end: max(5rem, env(safe-area-inset-right));
+  }
+}
+
+@media (width >= theme(--breakpoint-2xl)) {
+  html[data-pwa="true"] .container {
+    padding-inline-start: max(6rem, env(safe-area-inset-left));
+    padding-inline-end: max(6rem, env(safe-area-inset-right));
+  }
+}
+
+html[data-pwa="true"] main {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+html[data-pwa="true"] .dialog-viewport {
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  padding-left: max(1rem, env(safe-area-inset-left));
+}
+
+html[data-pwa="true"] button,
+html[data-pwa="true"] [role="button"],
+html[data-pwa="true"] a,
+html[data-pwa="true"] input,
+html[data-pwa="true"] select,
+html[data-pwa="true"] textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-pwa="true"] header .overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+html[data-pwa="true"] header .overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+
+html[data-pwa="true"] .overflow-x-auto {
+  contain: paint;
+  max-width: 100%;
+}
+
+html[data-pwa="true"] .toast-viewport {
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.75rem));
+  left: max(1rem, env(safe-area-inset-left));
+  width: auto;
+}
+
+@media (width >= theme(--breakpoint-sm)) {
+  html[data-pwa="true"] .toast-viewport {
+    left: auto;
+    width: 20rem;
+  }
+}
+
+@media (width < 768px) {
+  html[data-pwa="true"] input,
+  html[data-pwa="true"] select,
+  html[data-pwa="true"] textarea {
+    font-size: 16px;
+  }
+}
+
 :root {
   --cm-bg: var(--color-white);
   --cm-fg: var(--color-mist-900);

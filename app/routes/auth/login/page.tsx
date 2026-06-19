@@ -107,7 +107,7 @@ export default function Page({ loaderData, actionData }: Route.ComponentProps) {
   }
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center">
+    <div className="flex min-h-dvh w-full items-center justify-center p-4">
       <div>
         {urlState?.startsWith("error_") ? (
           <OidcErrorNotice code={urlState} />
@@ -135,7 +135,7 @@ export default function Page({ loaderData, actionData }: Route.ComponentProps) {
             ) : undefined}
           </Card>
         ) : undefined}
-        <Card className="m-4 max-w-md sm:m-0">
+        <Card className="max-w-md">
           <Card.Title>{t("login.welcome")}</Card.Title>
           <Form method="POST">
             <Card.Text>

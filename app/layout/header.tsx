@@ -87,7 +87,9 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
               <source srcSet={logoDark} media="(prefers-color-scheme: light)" />
               <img src={logoBg} alt={t("common.logoAlt")} />
             </picture>
-            <h1 className="text-2xl font-semibold">headplane</h1>
+            <h1 className="hidden text-xl font-semibold min-[390px]:block sm:text-2xl">
+              headplane
+            </h1>
           </div>
           {showTabs && (
             <nav className="hidden items-center gap-x-2 overflow-x-auto p-1 text-sm font-medium md:flex">
@@ -120,9 +122,12 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
             </nav>
           )}
         </div>
-        <div className="ml-auto grid shrink-0 grid-cols-3 gap-x-4">
+        <div className="ml-auto grid shrink-0 grid-cols-3 gap-x-2 sm:gap-x-4">
           <Menu>
-            <MenuTrigger aria-label={t("locale.language")} className="size-8 rounded-full p-1">
+            <MenuTrigger
+              aria-label={t("locale.language")}
+              className="size-10 rounded-full p-2 md:size-8 md:p-1"
+            >
               <Languages className="w-5" />
             </MenuTrigger>
             <MenuContent align="end">
@@ -145,7 +150,7 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
             </MenuContent>
           </Menu>
           <Menu>
-            <MenuTrigger className="size-8 rounded-full p-1">
+            <MenuTrigger className="size-10 rounded-full p-2 md:size-8 md:p-1">
               <CircleQuestionMark className="w-5" />
             </MenuTrigger>
             <MenuContent align="end">
@@ -167,11 +172,11 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
             </MenuContent>
           </Menu>
           <Menu>
-            <MenuTrigger className="size-8 overflow-hidden rounded-full">
+            <MenuTrigger className="size-10 overflow-hidden rounded-full md:size-8">
               {user.picture ? (
-                <img alt={user.name} className="size-8" src={user.picture} />
+                <img alt={user.name} className="size-full" src={user.picture} />
               ) : (
-                <CircleUser className="size-8" />
+                <CircleUser className="size-full" />
               )}
             </MenuTrigger>
             <MenuContent align="end">
@@ -231,7 +236,7 @@ export default function Header({ user, access, configAvailable }: HeaderProps) {
                   key={tab.to}
                   className={({ isActive }) =>
                     cn(
-                      "relative px-3 py-1.5 flex items-center gap-x-1.5 rounded-md text-nowrap",
+                      "relative px-3 py-2 flex items-center gap-x-1.5 rounded-md text-nowrap",
                       "hover:bg-mist-300/50 dark:hover:bg-mist-800",
                       "focus:outline-hidden focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-1",
                       "dark:focus:ring-indigo-400/40 dark:focus:ring-offset-mist-900",

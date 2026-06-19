@@ -37,6 +37,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 export function Layout({ children }: { readonly children: React.ReactNode }) {
   const { loaderData } = useRoute("root");
   const pwaEnabled = loaderData?.pwaEnabled === true;
+  const viewportContent = pwaEnabled
+    ? "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    : "width=device-width, initial-scale=1";
+  const pwaThemeColor =
+    loaderData?.colorScheme === "dark"
+      ? "#181717"
+      : loaderData?.colorScheme === "light"
+        ? "#e7e5e4"
+        : undefined;
 
   // LiveDataProvider is wrapped at the top level since dialogs and things
   // that control its state are usually open in portal containers which
@@ -45,6 +54,7 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
     <LiveDataProvider>
       <html
         lang={loaderData?.locale ?? "en"}
+        data-pwa={pwaEnabled ? "true" : undefined}
         className={
           loaderData?.colorScheme === "dark"
             ? "dark"
@@ -55,7 +65,8 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
       >
         <head>
           <meta charSet="utf-8" />
-          <meta content="width=device-width, initial-scale=1" name="viewport" />
+          <meta content={viewportContent} name="viewport" />
+          <meta content="light dark" name="color-scheme" />
           <Meta />
           <Links />
           <link href={`${__PREFIX__}/favicon.ico`} rel="icon" />
@@ -63,14 +74,43 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
             <>
               <link href={`${__PREFIX__}/manifest.webmanifest`} rel="manifest" />
               <link
-                href={`${__PREFIX__}/pwa-icon.svg?v=${encodeURIComponent(PWA_ICON_REV)}`}
+                href={`${__PREFIX__}/pwa-icon-180.png?v=${encodeURIComponent(PWA_ICON_REV)}`}
                 rel="apple-touch-icon"
+                sizes="180x180"
               />
-              <meta name="theme-color" content="#4f46e5" />
+              <link
+                href={`${__PREFIX__}/pwa-icon-192.png?v=${encodeURIComponent(PWA_ICON_REV)}`}
+                rel="icon"
+                sizes="192x192"
+                type="image/png"
+              />
+              <link
+                href={`${__PREFIX__}/pwa-icon-512.png?v=${encodeURIComponent(PWA_ICON_REV)}`}
+                rel="icon"
+                sizes="512x512"
+                type="image/png"
+              />
+              <meta content="yes" name="mobile-web-app-capable" />
+              <meta content="yes" name="apple-mobile-web-app-capable" />
+              <meta content="Headplane" name="apple-mobile-web-app-title" />
+              <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style" />
+              <meta content="telephone=no" name="format-detection" />
+              {pwaThemeColor ? (
+                <meta content={pwaThemeColor} name="theme-color" />
+              ) : (
+                <>
+                  <meta
+                    content="#e7e5e4"
+                    media="(prefers-color-scheme: light)"
+                    name="theme-color"
+                  />
+                  <meta content="#181717" media="(prefers-color-scheme: dark)" name="theme-color" />
+                </>
+              )}
             </>
           )}
         </head>
-        <body className="w-full overflow-x-hidden overscroll-none dark:bg-mist-900 dark:text-mist-50">
+        <body className="min-h-dvh w-full max-w-full overflow-x-hidden overscroll-none bg-white text-mist-900 dark:bg-mist-900 dark:text-mist-50">
           <I18nProvider locale={loaderData?.locale ?? "en"}>
             {children}
             <ToastProvider />
@@ -105,7 +145,7 @@ if ("serviceWorker" in navigator && location.hostname === ${JSON.stringify(PWA_H
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   return (
-    <div className="flex h-screen w-screen items-center justify-center p-4">
+    <div className="flex min-h-dvh w-full items-center justify-center p-4">
       <ErrorBanner className="max-w-2xl" error={error} />
     </div>
   );

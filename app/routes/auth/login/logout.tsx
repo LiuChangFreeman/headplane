@@ -5,8 +5,8 @@ export default function Logout() {
   const { t } = useI18n();
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center">
-      <Card className="m-4 max-w-md sm:m-0">
+    <div className="flex min-h-dvh w-full items-center justify-center p-4">
+      <Card className="max-w-md">
         <Card.Title>{t("login.loggedOutTitle")}</Card.Title>
         <Card.Text>{t("login.loggedOutBody")}</Card.Text>
       </Card>

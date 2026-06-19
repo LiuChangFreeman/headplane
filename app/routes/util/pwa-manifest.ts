@@ -15,14 +15,26 @@ export async function loader({ request }: Route.LoaderArgs) {
     start_url: `${__PREFIX__}/machines`,
     scope: `${__PREFIX__}/`,
     display: "standalone",
-    background_color: "#f8fafc",
-    theme_color: "#4f46e5",
+    background_color: "#181717",
+    theme_color: "#181717",
     icons: [
+      {
+        src: `${__PREFIX__}/pwa-icon-192.png?v=${encodeURIComponent(PWA_ICON_REV)}`,
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: `${__PREFIX__}/pwa-icon-512.png?v=${encodeURIComponent(PWA_ICON_REV)}`,
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any maskable",
+      },
       {
         src: `${__PREFIX__}/pwa-icon.svg?v=${encodeURIComponent(PWA_ICON_REV)}`,
         sizes: "any",
         type: "image/svg+xml",
-        purpose: "any maskable",
+        purpose: "any",
       },
     ],
   };
