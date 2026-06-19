@@ -9,7 +9,6 @@ import { Capabilities } from "~/server/web/roles";
 import log from "~/utils/log";
 
 import type { Route } from "./+types/app";
-import Footer from "./footer";
 import Header from "./header";
 
 export const shouldRevalidate: ShouldRevalidateFunction = ({
@@ -111,7 +110,7 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
         configAvailable={loaderData.configAvailable}
         user={loaderData.user}
       />
-      <main className="container mt-4 mb-24 overscroll-contain">
+      <main className="container mt-4 mb-12 overscroll-contain">
         {!loaderData.isHealthy && (
           <StatusBanner
             className="mb-4"
@@ -124,7 +123,6 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
         )}
         <Outlet />
       </main>
-      <Footer isDebug={loaderData.isDebug} baseUrl={loaderData.baseUrl} />
     </>
   );
 }

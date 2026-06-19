@@ -3,6 +3,9 @@ import { index, layout, prefix, route } from "@react-router/dev/routes";
 export default [
   // Utility Routes
   route("/healthz", "routes/util/healthz.ts"),
+  route("/manifest.webmanifest", "routes/util/pwa-manifest.ts"),
+  route("/pwa-icon.svg", "routes/util/pwa-icon.ts"),
+  route("/sw.js", "routes/util/pwa-service-worker.ts"),
 
   // API Routes
   ...prefix("/api", [
