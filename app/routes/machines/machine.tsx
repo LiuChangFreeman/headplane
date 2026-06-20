@@ -146,20 +146,19 @@ export default function Page({
       </div>
       <Routes isOpen={showRouting} node={node} setIsOpen={setShowRouting} />
       <h2 className="mt-8 text-xl font-medium">{t("machines.subnetsRouting")}</h2>
-      <div className="mb-4 flex items-center justify-between">
-        <p>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="min-w-0">
           {t("machines.subnetsRoutingDescription")}{" "}
           <Link external styled to="https://tailscale.com/kb/1019/subnets">
             {t("common.learnMore")}
           </Link>
         </p>
-        <Button onClick={() => setShowRouting(true)}>{t("machines.review")}</Button>
+        <Button className="self-start sm:self-auto" onClick={() => setShowRouting(true)}>
+          {t("machines.review")}
+        </Button>
       </div>
       <Card
-        className={cn(
-          "w-full max-w-full grid sm:grid-cols-2",
-          "md:grid-cols-4 gap-8 mr-2 text-sm mb-8",
-        )}
+        className={cn("w-full max-w-full grid sm:grid-cols-2", "md:grid-cols-4 gap-8 text-sm mb-8")}
         variant="flat"
       >
         <div>

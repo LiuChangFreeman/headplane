@@ -97,13 +97,15 @@ body {
 
 html[data-pwa="true"],
 html[data-pwa="true"] body {
-  min-height: 100%;
+  min-height: 100dvh;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  overflow-y: auto;
   overscroll-behavior: none;
   touch-action: pan-x pan-y;
   -webkit-text-size-adjust: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 html[data-pwa="true"] {
@@ -173,6 +175,19 @@ html[data-pwa="true"] .dialog-viewport {
   padding-left: max(1rem, env(safe-area-inset-left));
 }
 
+html[data-pwa="true"] .dialog-scroll-area {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  html[data-pwa="true"] .dialog-viewport {
+    align-items: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 html[data-pwa="true"] button,
 html[data-pwa="true"] [role="button"],
 html[data-pwa="true"] a,
@@ -192,8 +207,13 @@ html[data-pwa="true"] header .overflow-x-auto::-webkit-scrollbar {
 }
 
 html[data-pwa="true"] .overflow-x-auto {
-  contain: paint;
   max-width: 100%;
+}
+
+html[data-pwa="true"] .machine-table-scroll {
+  -webkit-overflow-scrolling: touch;
+  isolation: isolate;
+  overscroll-behavior-inline: contain;
 }
 
 html[data-pwa="true"] .toast-viewport {

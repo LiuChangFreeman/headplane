@@ -41,7 +41,9 @@ export default function MachineMenu({
   const supportsTailscaleSSH = node.hostInfo?.sshHostKeys && node.hostInfo?.sshHostKeys.length > 0;
 
   return (
-    <div className="flex items-center justify-end gap-1.5 px-4">
+    <div
+      className={cn("flex items-center justify-end gap-1.5", isFullButton ? "" : "px-0 md:px-4")}
+    >
       {modal === "remove" && (
         <Delete
           isOpen={modal === "remove"}
@@ -156,7 +158,11 @@ export default function MachineMenu({
             <Ellipsis className="h-5" />
           )}
         </MenuTrigger>
-        <MenuContent>
+        <MenuContent
+          align="end"
+          collisionAvoidance={{ side: "shift", align: "shift", fallbackAxisSide: "none" }}
+          side={isFullButton ? "bottom" : "top"}
+        >
           <MenuItem onClick={() => setModal("rename")}>{t("machines.editMachineName")}</MenuItem>
           <MenuItem onClick={() => setModal("routes")}>{t("machines.editRouteSettings")}</MenuItem>
           <MenuItem onClick={() => setModal("tags")}>{t("machines.editAclTags")}</MenuItem>

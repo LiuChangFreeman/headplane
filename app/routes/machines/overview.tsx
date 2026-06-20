@@ -14,6 +14,7 @@ import cn from "~/utils/cn";
 import { mapNodes, sortAssignableTags, type PopulatedNode } from "~/utils/node-info";
 
 import type { Route } from "./+types/overview";
+import MachineCard from "./components/machine-card";
 import { MachineFilters } from "./components/machine-filters";
 import MachineRow from "./components/machine-row";
 import NewMachine from "./dialogs/new";
@@ -274,7 +275,35 @@ export default function Page({ loaderData }: Route.ComponentProps) {
             : t("machines.totalCount", { count: loaderData.populatedNodes.length })}
         </span>
       </div>
-      <div className="overflow-x-auto">
+      <div className="grid gap-3 pb-56 md:hidden">
+        {filteredAndSortedNodes.length === 0 ? (
+          <p className="rounded-lg border border-mist-200 py-8 text-center text-mist-500 dark:border-mist-800">
+            {t("machines.noMachinesMatch")}
+          </p>
+        ) : (
+          filteredAndSortedNodes.map((node) => (
+            <MachineCard
+              existingTags={loaderData.existingTags}
+              isAgent={
+                loaderData.agent !== undefined
+                  ? node.nodeKey === loaderData.agent.nodeKey
+                  : undefined
+              }
+              isDisabled={
+                loaderData.writable
+                  ? false // If the user has write permissions, they can edit all machines
+                  : node.user?.id !== loaderData.headscaleUserId
+              }
+              key={node.id}
+              magic={loaderData.magic}
+              node={node}
+              supportsNodeOwnerChange={loaderData.supportsNodeOwnerChange}
+              users={loaderData.users}
+            />
+          ))
+        )}
+      </div>
+      <div className="machine-table-scroll hidden overflow-x-auto md:block">
         <table className="w-full min-w-160 table-auto rounded-lg">
           <thead className="text-mist-600 dark:text-mist-300">
             <tr className="px-0.5 text-left">

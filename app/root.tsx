@@ -19,7 +19,16 @@ import "@fontsource-variable/inter/opsz.css";
 import "./tailwind.css";
 import { getColorScheme } from "./utils/color-scheme";
 import { getLocale } from "./utils/locale";
-import { PWA_HOST, PWA_ICON_REV, isPwaHost } from "./utils/pwa";
+import {
+  PWA_DEFAULT_VIEWPORT,
+  PWA_HOST,
+  PWA_ICON_REV,
+  PWA_LOCKED_VIEWPORT,
+  PWA_SPLASH_REV,
+  PWA_SPLASH_SCREENS,
+  isPwaHost,
+  isPwaUiRequest,
+} from "./utils/pwa";
 
 export const meta: MetaFunction = () => [
   { title: "Headplane" },
@@ -31,15 +40,71 @@ export const meta: MetaFunction = () => [
 
 export async function loader({ request }: Route.LoaderArgs) {
   const [colorScheme, locale] = await Promise.all([getColorScheme(request), getLocale(request)]);
-  return { colorScheme, locale, pwaEnabled: isPwaHost(request) };
+  return {
+    colorScheme,
+    locale,
+    pwaHost: isPwaHost(request),
+    pwaUiEnabled: isPwaUiRequest(request),
+  };
+}
+
+function pwaClientScopeScript() {
+  return `
+(() => {
+  const host = ${JSON.stringify(PWA_HOST)};
+  if (location.hostname !== host) return;
+
+  const mobileUserAgent = /\\b(iPhone|iPad|iPod|Android|Mobile)\\b/i;
+  const lockedViewport = ${JSON.stringify(PWA_LOCKED_VIEWPORT)};
+  const defaultViewport = ${JSON.stringify(PWA_DEFAULT_VIEWPORT)};
+
+  let applying = false;
+  const isMobile = () => mobileUserAgent.test(navigator.userAgent || "");
+  const apply = () => {
+    if (applying) return;
+    applying = true;
+    try {
+      const enabled = isMobile();
+      const root = document.documentElement;
+      const viewport = document.querySelector('meta[name="viewport"]');
+
+      if (enabled) {
+        if (root.getAttribute("data-pwa") !== "true") root.setAttribute("data-pwa", "true");
+      } else if (root.hasAttribute("data-pwa")) {
+        root.removeAttribute("data-pwa");
+      }
+
+      if (viewport) {
+        const content = enabled ? lockedViewport : defaultViewport;
+        if (viewport.getAttribute("content") !== content) viewport.setAttribute("content", content);
+      }
+    } finally {
+      applying = false;
+    }
+  };
+
+  apply();
+
+  const observer = new MutationObserver(apply);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-pwa"] });
+  if (document.head) {
+    observer.observe(document.head, {
+      attributes: true,
+      attributeFilter: ["content"],
+      childList: true,
+      subtree: true,
+    });
+  }
+  window.addEventListener("pageshow", apply);
+})();
+`;
 }
 
 export function Layout({ children }: { readonly children: React.ReactNode }) {
   const { loaderData } = useRoute("root");
-  const pwaEnabled = loaderData?.pwaEnabled === true;
-  const viewportContent = pwaEnabled
-    ? "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-    : "width=device-width, initial-scale=1";
+  const pwaHost = loaderData?.pwaHost === true;
+  const pwaUiEnabled = loaderData?.pwaUiEnabled === true;
+  const viewportContent = pwaUiEnabled ? PWA_LOCKED_VIEWPORT : PWA_DEFAULT_VIEWPORT;
   const pwaThemeColor =
     loaderData?.colorScheme === "dark"
       ? "#181717"
@@ -54,7 +119,7 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
     <LiveDataProvider>
       <html
         lang={loaderData?.locale ?? "en"}
-        data-pwa={pwaEnabled ? "true" : undefined}
+        data-pwa={pwaUiEnabled ? "true" : undefined}
         className={
           loaderData?.colorScheme === "dark"
             ? "dark"
@@ -70,7 +135,14 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
           <Meta />
           <Links />
           <link href={`${__PREFIX__}/favicon.ico`} rel="icon" />
-          {pwaEnabled && (
+          {pwaHost && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: pwaClientScopeScript(),
+              }}
+            />
+          )}
+          {pwaHost && (
             <>
               <link href={`${__PREFIX__}/manifest.webmanifest`} rel="manifest" />
               <link
@@ -93,8 +165,17 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
               <meta content="yes" name="mobile-web-app-capable" />
               <meta content="yes" name="apple-mobile-web-app-capable" />
               <meta content="Headplane" name="apple-mobile-web-app-title" />
+              <meta content="Headplane" name="application-name" />
               <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style" />
               <meta content="telephone=no" name="format-detection" />
+              {PWA_SPLASH_SCREENS.map((screen) => (
+                <link
+                  href={`${__PREFIX__}/${screen.file}?v=${encodeURIComponent(PWA_SPLASH_REV)}`}
+                  key={screen.file}
+                  media={screen.media}
+                  rel="apple-touch-startup-image"
+                />
+              ))}
               {pwaThemeColor ? (
                 <meta content={pwaThemeColor} name="theme-color" />
               ) : (
@@ -115,7 +196,7 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
             {children}
             <ToastProvider />
           </I18nProvider>
-          {pwaEnabled && (
+          {pwaHost && (
             <script
               dangerouslySetInnerHTML={{
                 __html: `

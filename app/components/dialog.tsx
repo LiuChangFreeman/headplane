@@ -57,10 +57,35 @@ function Panel(props: DialogPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const { t } = useI18n();
 
+  const handleContentWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    const element = event.currentTarget;
+    const maxScrollTop = element.scrollHeight - element.clientHeight;
+    if (maxScrollTop <= 0 || event.deltaY === 0) {
+      return;
+    }
+
+    const multiplier =
+      event.deltaMode === WheelEvent.DOM_DELTA_LINE
+        ? 16
+        : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+          ? element.clientHeight
+          : 1;
+    const nextScrollTop = Math.min(
+      maxScrollTop,
+      Math.max(0, element.scrollTop + event.deltaY * multiplier),
+    );
+
+    if (nextScrollTop !== element.scrollTop) {
+      element.scrollTop = nextScrollTop;
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
   return (
     <AlertDialog.Popup
       className={cn(
-        "flex w-full max-w-lg flex-col rounded-xl p-4",
+        "flex w-full max-w-lg flex-col overflow-hidden rounded-xl p-4",
         "max-h-[90dvh]",
         "outline-hidden",
         "bg-white dark:bg-mist-900",
@@ -84,7 +109,10 @@ function Panel(props: DialogPanelProps) {
         {/* px-1 -mx-1 gives focus rings on inputs/buttons room to render
             without being clipped by overflow-y-auto (which implicitly forces
             overflow-x: auto per CSS spec). */}
-        <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
+        <div
+          className="dialog-scroll-area -mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1"
+          onWheelCapture={handleContentWheel}
+        >
           {children}
         </div>
         <div className="mt-5 flex shrink-0 justify-end gap-3">

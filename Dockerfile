@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends patch && rm -rf
 
 COPY go.mod go.sum build.sh ./
 COPY patches/ ./patches/
+RUN sed -i 's/\r$//' build.sh && chmod +x build.sh
 RUN go mod download
 
 COPY cmd/ ./cmd/
@@ -33,6 +34,7 @@ WORKDIR /run
 RUN corepack enable
 COPY patches ./patches
 COPY package.json pnpm-lock.yaml build.sh ./
+RUN sed -i 's/\r$//' build.sh && chmod +x build.sh
 
 COPY --from=go-base /bin/hp_ssh.wasm /run/public/hp_ssh.wasm
 COPY --from=go-base /bin/wasm_exec.js /run/public/wasm_exec.js
@@ -40,6 +42,7 @@ RUN ./build.sh --app --app-install-only
 
 COPY . .
 ARG HEADPLANE_VERSION
+RUN sed -i 's/\r$//' build.sh && chmod +x build.sh
 RUN HEADPLANE_VERSION=$HEADPLANE_VERSION ./build.sh --app
 
 FROM gcr.io/distroless/nodejs24-debian13:latest AS final

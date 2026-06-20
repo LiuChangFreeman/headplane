@@ -15,8 +15,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     start_url: `${__PREFIX__}/machines`,
     scope: `${__PREFIX__}/`,
     display: "standalone",
+    display_override: ["standalone", "minimal-ui", "browser"],
     background_color: "#181717",
     theme_color: "#181717",
+    categories: ["utilities", "productivity"],
+    orientation: "any",
     icons: [
       {
         src: `${__PREFIX__}/pwa-icon-192.png?v=${encodeURIComponent(PWA_ICON_REV)}`,
@@ -35,6 +38,32 @@ export async function loader({ request }: Route.LoaderArgs) {
         sizes: "any",
         type: "image/svg+xml",
         purpose: "any",
+      },
+    ],
+    shortcuts: [
+      {
+        name: "设备",
+        short_name: "设备",
+        url: `${__PREFIX__}/machines`,
+        icons: [
+          {
+            src: `${__PREFIX__}/pwa-icon-192.png?v=${encodeURIComponent(PWA_ICON_REV)}`,
+            sizes: "192x192",
+            type: "image/png",
+          },
+        ],
+      },
+      {
+        name: "预认证密钥",
+        short_name: "密钥",
+        url: `${__PREFIX__}/settings/auth-keys`,
+        icons: [
+          {
+            src: `${__PREFIX__}/pwa-icon-192.png?v=${encodeURIComponent(PWA_ICON_REV)}`,
+            sizes: "192x192",
+            type: "image/png",
+          },
+        ],
       },
     ],
   };
