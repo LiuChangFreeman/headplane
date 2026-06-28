@@ -100,6 +100,199 @@ function pwaClientScopeScript() {
 `;
 }
 
+function pwaLaunchSplashStyle() {
+  return `
+html[data-pwa="true"],
+html[data-pwa="true"] body {
+  background: #e7e5e4;
+}
+#headplane-launch-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(env(safe-area-inset-top, 0px), 20px) 24px max(env(safe-area-inset-bottom, 0px), 20px);
+  background: #e7e5e4;
+  color: #181717;
+  opacity: 1;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+#headplane-launch-splash[data-state="hidden"] {
+  opacity: 0;
+}
+.headplane-launch-mark {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 12px);
+  place-content: center;
+  gap: 7px;
+  background: #181717;
+  box-shadow:
+    0 18px 42px rgb(24 23 23 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.16);
+}
+.headplane-launch-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #f7f5f4;
+}
+.headplane-launch-dot[data-muted="true"] {
+  background: #444343;
+}
+.headplane-launch-progress {
+  position: absolute;
+  left: 50%;
+  bottom: max(calc(env(safe-area-inset-bottom, 0px) + 42px), 42px);
+  width: 96px;
+  height: 3px;
+  margin-left: -48px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgb(24 23 23 / 0.12);
+}
+.headplane-launch-progress::after {
+  content: "";
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: #181717;
+  animation: headplane-launch-progress 1120ms ease-in-out infinite;
+}
+@keyframes headplane-launch-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(240%);
+  }
+}
+@media (prefers-color-scheme: dark) {
+  html[data-pwa="true"],
+  html[data-pwa="true"] body,
+  #headplane-launch-splash {
+    background: #181717;
+    color: #f7f5f4;
+  }
+  .headplane-launch-mark {
+    background: #f7f5f4;
+    box-shadow:
+      0 18px 42px rgb(0 0 0 / 0.36),
+      inset 0 1px 0 rgb(255 255 255 / 0.55);
+  }
+  .headplane-launch-dot {
+    background: #181717;
+  }
+  .headplane-launch-dot[data-muted="true"] {
+    background: #c7c0bc;
+  }
+  .headplane-launch-progress {
+    background: rgb(247 245 244 / 0.18);
+  }
+  .headplane-launch-progress::after {
+    background: #f7f5f4;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #headplane-launch-splash {
+    transition: none;
+  }
+  .headplane-launch-progress::after {
+    animation: none;
+    width: 100%;
+  }
+}
+`;
+}
+
+function pwaLaunchSplashScript() {
+  return `
+(function () {
+  var host = ${JSON.stringify(PWA_HOST)};
+  if (location.hostname !== host) return;
+
+  var mobileUserAgent = /\\b(iPhone|iPad|iPod|Android|Mobile)\\b/i;
+  if (!mobileUserAgent.test(navigator.userAgent || "")) return;
+
+  var splash = document.getElementById("headplane-launch-splash");
+  var root = document.getElementById("headplane-app-root");
+  if (!splash || !root) return;
+
+  var hidden = false;
+  var observer = null;
+  var startedAt = Date.now();
+  var minimumVisibleMs = 520;
+  var loadFallbackMs = 1800;
+
+  function hasMountedContent() {
+    return root.childElementCount > 0 || (root.textContent || "").trim().length > 0;
+  }
+
+  function hide() {
+    if (hidden) return;
+    hidden = true;
+    if (observer) observer.disconnect();
+    splash.setAttribute("data-state", "hidden");
+    window.setTimeout(function () {
+      if (splash && splash.parentNode) {
+        splash.parentNode.removeChild(splash);
+      }
+    }, 260);
+  }
+
+  function scheduleHide() {
+    if (hidden || !hasMountedContent()) return;
+    var delay = Math.max(0, minimumVisibleMs - (Date.now() - startedAt));
+    window.requestAnimationFrame(function () {
+      window.setTimeout(hide, delay);
+    });
+  }
+
+  function hideAfterPageIsReady() {
+    if (!hasMountedContent()) return;
+    if (document.readyState === "complete") {
+      scheduleHide();
+      return;
+    }
+
+    var fallback = window.setTimeout(scheduleHide, loadFallbackMs);
+    window.addEventListener(
+      "load",
+      function () {
+        window.clearTimeout(fallback);
+        scheduleHide();
+      },
+      { once: true }
+    );
+  }
+
+  window.__headplaneHideLaunchSplash = hide;
+
+  if (hasMountedContent()) {
+    hideAfterPageIsReady();
+  } else {
+    observer = new MutationObserver(function () {
+      if (hasMountedContent()) {
+        hideAfterPageIsReady();
+      }
+    });
+    observer.observe(root, { childList: true, subtree: true, characterData: true });
+  }
+
+  window.addEventListener("pageshow", hideAfterPageIsReady);
+  window.setTimeout(function () {
+    if (hasMountedContent()) scheduleHide();
+  }, 3000);
+})();
+`;
+}
+
 export function Layout({ children }: { readonly children: React.ReactNode }) {
   const { loaderData } = useRoute("root");
   const pwaHost = loaderData?.pwaHost === true;
@@ -132,6 +325,14 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
           <meta charSet="utf-8" />
           <meta content={viewportContent} name="viewport" />
           <meta content="light dark" name="color-scheme" />
+          {pwaUiEnabled && (
+            <style
+              dangerouslySetInnerHTML={{
+                __html: pwaLaunchSplashStyle(),
+              }}
+              id="headplane-launch-splash-style"
+            />
+          )}
           <Meta />
           <Links />
           <link href={`${__PREFIX__}/favicon.ico`} rel="icon" />
@@ -192,10 +393,36 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
           )}
         </head>
         <body className="min-h-dvh w-full max-w-full overflow-x-hidden overscroll-none bg-white text-mist-900 dark:bg-mist-900 dark:text-mist-50">
-          <I18nProvider locale={loaderData?.locale ?? "en"}>
-            {children}
-            <ToastProvider />
-          </I18nProvider>
+          {pwaUiEnabled && (
+            <div aria-hidden="true" id="headplane-launch-splash">
+              <div className="headplane-launch-mark">
+                <span className="headplane-launch-dot" />
+                <span className="headplane-launch-dot" data-muted="true" />
+                <span className="headplane-launch-dot" />
+                <span className="headplane-launch-dot" />
+                <span className="headplane-launch-dot" />
+                <span className="headplane-launch-dot" />
+                <span className="headplane-launch-dot" />
+                <span className="headplane-launch-dot" data-muted="true" />
+                <span className="headplane-launch-dot" />
+              </div>
+              <div className="headplane-launch-progress" />
+            </div>
+          )}
+          <div id="headplane-app-root">
+            <I18nProvider locale={loaderData?.locale ?? "en"}>
+              {children}
+              <ToastProvider />
+            </I18nProvider>
+          </div>
+          {pwaUiEnabled && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: pwaLaunchSplashScript(),
+              }}
+              id="headplane-launch-splash-script"
+            />
+          )}
           {pwaHost && (
             <script
               dangerouslySetInnerHTML={{
